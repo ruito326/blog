@@ -1,0 +1,74 @@
+<%= link_to image_tag('logo.png'), '/' %>
+<h1><%= @post.title %></h1>
+
+<p><%= @post.content %></p>
+
+<h2>Comment</h2>
+<ul>
+<% if @post.comments.any? %>
+<% @post.comments.each do |comment| %>
+
+<li id="comment_<%= comment.id %>">
+  <%= comment.body %>(by <%= comment.commenter %>)
+  <%= link_to 'Delete',[comment.post, comment], :confirm =>  'Sure?',
+                                             :method => :delete,
+                                             :remote => true %>
+</li>
+<% end %>
+<% else %>
+<li>No Comment Yet.</li>
+
+<%  end %>
+</ul>
+
+<h2>コメントを書く</h2>
+<%= form_for([@post, @comment]) do |f| %>
+
+<% if @comment.errors.any? %>
+<ul>
+<%= @comment.errors.full_messages.each do |msg| %>
+<li><%= msg %></li>
+<% end %>
+</ul>
+<% end %>
+
+    <div class="field">
+      <%= f.label :commenter %>
+      <%= f.text_field :commenter %>
+    </div>
+
+    <div class="field">
+      <%= f.label :body %>
+      <%= f.text_area :body, :rows => 5 %>
+    </div>
+
+    <div class="actions">
+      <%= f.submit %>
+    </div>
+
+
+<% end %>
+
+<div id='user_nav'>
+  <% if user_signed_in? %>
+      Signed in as <%= current_user.email %>. <%= link_to "Sign out", destroy_user_session_path, :method => :delete %>
+  <% else %>
+      <%= link_to "Sign up", new_user_registration_path %> or
+      <%= link_to "Sign in", new_user_session_path %>
+  <% end %>
+</div>
+
+<p>
+  <%= image_tag @post.avatar.url %>
+</p>
+
+<%= link_to 'Home', posts_path %>
+
+<script>
+    $(function() {
+        $(document).on('ajax:success', 'a[data-method="delete"]', function(e, data, status, xhr) {
+            $('#comment_'+data.comment.id).fadeOut("slow");
+        });
+
+    });
+</script>
